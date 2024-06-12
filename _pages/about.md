@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: /
+subtitle: 
 
 news: true # includes a list of news items
 ---
