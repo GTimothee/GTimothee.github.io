@@ -2,24 +2,34 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Moto. Etc.
-
-profile:
-  align: right
-  image: prof_pic.jpg
-  image_circular: false # crops the image to make it circular
-  more_info: >
-    <p>555 your office number</p>
-    <p>123 your address street</p>
-    <p>Your City, State 12345</p>
+subtitle: /
 
 news: true # includes a list of news items
 selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
+## Welcome to My World of AI and Deep Learning
 
-Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
+Hi there! I’m Timothée, a passionate AI engineer with a love for implementing practical solutions with deep learning and artificial intelligence. This is my digital space where I share my journey, projects, discoveries, and insights into the fascinating world of AI.
 
-Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them.
+### My goal with this website
+
+My goal with this website is to create value by sharing my knowledge and findings about ai and by building projects to improve my skills and collect feedback, while contributing to the community and most importantly, having fun. Through this platform, I aim to:
+
+    Share Knowledge: From detailed tutorials to insightful blog posts, I’m committed to spreading knowledge and helping others navigate the AI landscape.
+    Showcase Projects: Explore my portfolio of AI projects where theory meets real-world applications. Each project is a testament to the power and potential of AI.
+    Discover and Innovate: Join me as I delve into cutting-edge research, experiment with new techniques, and push the boundaries of what’s possible with deep learning.
+    Express Opinions: Read my thoughts on the latest trends, ethical considerations, and the future of AI. I believe in fostering a thoughtful and informed community.
+
+Let's start small and see where it can lead us.
+
+## Who Am I?
+
+I’m Timothée Guédon, an AI engineer from France. I have been a machine learning engineer at Luminess and data scientist at Sidetrade. I decided to switch to my current position to focus solely on AI (deep learning-based applications).
+
+## Join the Journey
+
+Whether you’re an AI novice, a seasoned professional, or just curious about the field, there’s something here for you. I invite you to explore, learn, and engage with the content. Together, we can explore the limitless possibilities of AI and deep learning.
+
+Feel free to reach out, share your thoughts, or collaborate on exciting projects. Let’s connect and make the world a smarter place, one algorithm at a time.
