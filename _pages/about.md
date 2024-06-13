@@ -7,11 +7,11 @@ subtitle:
 news: true # includes a list of news items
 ---
 
-## Welcome to My World of AI and Deep Learning 🤖🌐
+### Welcome to My World of AI and Deep Learning 🤖🌐
 
 Hi there! I’m Timothée, a passionate AI engineer with a love for implementing practical solutions with deep learning and artificial intelligence. This is my digital space where I share my journey, projects, discoveries, and insights into the fascinating world of AI.
 
-### My Goal with This Website 🎯
+#### My Goal with This Website 🎯
 
 My goal with this website is to create value by sharing my knowledge and findings about AI and by building projects to improve my skills and collect feedback, while contributing to the community and most importantly, having fun. Through this platform, I aim to:
 
@@ -22,12 +22,12 @@ My goal with this website is to create value by sharing my knowledge and finding
 
 Let's start small and see where it can lead us. 🌱
 
-### Who Am I? 🤔
+#### Who Am I? 🤔
 
 I’m Timothée Guédon, an AI engineer from France. I have been a machine learning engineer at Luminess and a data scientist at Sidetrade. I decided to switch to my current position to focus solely on AI (deep learning-based applications).
 
 
-### Join the Journey 🚶‍♂️💻
+#### Join the Journey 🚶‍♂️💻
 
 Whether you’re an AI novice, a seasoned professional, or just curious about the field, there’s something here for you. I invite you to explore, learn, and engage with the content. Together, we can explore the limitless possibilities of AI and deep learning.
 
