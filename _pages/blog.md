@@ -18,6 +18,7 @@ pagination:
 
 <div class="post">
 
+{% include figure.liquid loading="eager" path="assets/img/banner.jpeg" title="The Python AI Craftsman blog banner" class="img-fluid rounded z-depth-1" %} 
 {% assign blog_name_size = site.blog_name | size %}
 {% assign blog_description_size = site.blog_description | size %}
 
