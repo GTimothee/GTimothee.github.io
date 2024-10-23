@@ -11,7 +11,7 @@ categories: rag
 
 In this blog post I show you how I build my simple evaluation procedure for a basic Q/A RAG system without use of external library or anything fancy. All you need is... an existing RAG system and to have access to an LLM. I also introduce two metrics I usually use to evaluate RAG systems, which are simple, quite robust, and easily interpretable in my opinion: completeness and conciseness.  
 
-## A Q/A evaluation
+## Q/A evaluation
 By Q/A evaluation I mean that each question of the test set is associated to (and can be answered with) one document chunk. Consequently, this evaluation procedure is for Q/A RAG only; Indeed, if you are looking for an answer for which you must gather data from multiple chunks, this procedure would not evaluate that. Still, I believe it is a good starting point when evaluating your RAG, as if you cannot reliably find one document chunk, how could you find multiple target document chunks? You could probably start with this procedure and then add another procedure for more complex use cases.
 
 ## Dataset generation
