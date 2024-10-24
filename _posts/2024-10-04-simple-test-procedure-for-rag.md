@@ -3,7 +3,7 @@ layout: post
 title: Test procedure and metrics for RAG in 5 minutes
 date: 2024-10-04 00:00:00
 description: Simple test procedure and metrics for your RAG in 5 minutes
-tags: llm rag evaluation procedure
+tags: llm rag evaluation procedure metrics
 categories: rag
 ---
 
