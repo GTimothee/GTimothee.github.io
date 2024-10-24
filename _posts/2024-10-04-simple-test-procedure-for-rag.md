@@ -66,7 +66,8 @@ Only return the JSON, with no additional text.
 Here is the JSON data to evaluate: 
 {input}
 
-Answer:"""```
+Answer:"""
+```
 
 Additional comments:
 - The input is a python dict with keys question, answer and ground_truth_answer. You can pass it as a string using json.dumps
