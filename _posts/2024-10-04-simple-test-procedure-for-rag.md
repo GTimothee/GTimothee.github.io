@@ -18,6 +18,66 @@ categories: rag
 
 The dataset generation part is pretty simple. Go over each document chunk of your database and generate a question/answer pair for each chunk with the help of an LLM. Keep track of the chunk used for generation so that we can evaluate the RAG performance later. In other words, output a triple (question, answer, chunk) for each chunk.
 
+Here is a piece of code that does just that:
+
+```python
+SYSTEM_PROMPT = """You are an AI teacher, writing an exam out of course material.
+Your task is to generate a (question, answer) pair from a given chunk from the course that is given to you.  
+Return a JSON object with two keys:
+- 'question': a question generated from the given chunk
+- 'answer': the answer to the question
+Just return the JSON, without any premamble or comment.
+
+Chunk of the course material:
+{chunk}
+"""
+
+
+class QAPair(BaseModel):
+    question: str = Field(description="question generated from the given chunk")
+    answer: str = Field(description="the answer to the question")
+
+
+if __name__ == "__main__":
+    assert os.path.isdir(
+        args.output_dir
+    ), f"Output directory not found: {args.output_dir}"
+    assert os.path.isdir(args.chroma_dir), f"Chroma db not found: {args.chroma_dir}"
+
+    load_dotenv()
+    db = get_db(args.chroma_dir)
+    llm = # your llm here
+    parser = JsonOutputParser(pydantic_object=QAPair)
+    prompt = PromptTemplate(
+        template=SYSTEM_PROMPT,
+        input_variables=["chunk"],
+        partial_variables={"format_instructions": parser.get_format_instructions()},
+    )
+    chain = prompt | llm | parser
+
+    data = db.get()
+
+    if args.limit > 0:
+        n_chunks = args.limit
+        output_filename = f"qa_dataset_limit={n_chunks}.csv"
+    else:
+        n_chunks = len(data["documents"])
+        output_filename = "qa_dataset.csv"
+
+    dataset = {"question": [], "ground_truth_answer": [], "chunk_id": []}
+    for i in tqdm(range(n_chunks)):
+        chunk = data["documents"][i]
+        output = chain.invoke({"chunk": chunk})
+        dataset["question"].append(output["question"])
+        dataset["ground_truth_answer"].append(output["answer"])
+        dataset["chunk_id"].append(data["ids"][i])
+
+    df = pd.DataFrame(dataset)
+    df.to_csv(str(Path(args.output_dir, output_filename)), index=False)
+```
+
+Find the full code example [here](https://github.com/GTimothee/RAG_experiments/blob/main/test_procedure_for_rag/generate_qa_pairs.py).
+
 In the following of the post I only use a test set, but of course you can split it into a validation set and a test set, ensuring that the proportion of each source document is approximately the same in each set.
 
 ## Step 2 — Procedure’s pseudo code
@@ -26,15 +86,11 @@ Without further delay, let's have a look at the full test procedure:
 ```python
 for each document
   for each chunk in the document
-    # 1- generate the Q/A pair
-    generate a (question, answer) pair
-    rename answer to 'ground_truth'
-    
-    # 2- retrieve the answer from your system
+    # 1- retrieve the answer from your system
     run your RAG system on the question
     gather the answer and the list of chunks retrieved and used as context
     
-    # 3- evaluate
+    # 2- evaluate
     compute your performance metrics of the whole system by comparing the answer and the ground_truth
     compute your rag performance by saving the rank of the target context in the contexts list that has been retrieved by your system. If the target context is not there, the rank is set to None or something equivalent.
     Save everything as a line in a csv file
@@ -42,39 +98,91 @@ for each document
 
 That’s it. You get a csv file as output with all the data you need, you can now compute statistics like the completeness, conciseness and ranking distributions, the %match, %misses. A nice to have is to compute statistics per document (add a column to the csv file with the index or the name of the document).
 
-## Completeness and conciseness
-
-Here is an example prompt for computing completeness and conciseness:
+Here is an interpretation of the first part of the peudocode, to generate answers from the dataset:
 
 ```python
-prompt = """You are a grading software for a teacher.
-You will be given a JSON with a 'question' (for context), an 'answer' and a 'ground truth answer'.
-Your task is to grade the 'answer' by returning two float scores from 0 to 1: 'completeness' and 'conciseness'. 
+rag_chain, retriever, db = get_rag_chain_eval(chroma_db_dirpath=path_to_your_db)
+df = pd.read_csv(args.dataset_filepath)
+outputs = {
+    'answers': [], 'ranks': []
+}
 
-For completeness:
-- A score of 1 means that all the information in the 'ground truth answer' can be found in the 'answer'. No matter if the answer contains more information than expected.
-- A score of 0 means that the 'answer' contains no information present in the 'ground truth answer'.
+for row in tqdm(df.itertuples(), total=len(df), desc='Generating answers...'):
+    documents = retriever.invoke(row.question)
 
-For conciseness: It is the percentage of the answer that is information present in the ground truth.
+    # generate answer
+    output = rag_chain.invoke({
+        "question": row.question,
+        "context": '\n'.join([doc.page_content for doc in documents])
+    })
+    outputs['answers'].append(output)
 
-Provide your answer as a JSON with four keys: 
-- 'completeness' is the completeness score (float)
-- 'conciseness' is the conciseness score (float)
+    # compute rank of the target documents in the list of retrieved documents
+    target_chunk = db.get(row.chunk_id)['documents'][0]
+    rank = None
+    for i, chunk in enumerate(documents):
+        if chunk.page_content == target_chunk:
+            rank = i
+    outputs['ranks'].append(rank)
 
-Only return the JSON, with no additional text.
-
-Here is the JSON data to evaluate: 
-{input}
-
-Answer:"""
+pd.DataFrame(outputs).to_csv(
+    str(Path(args.output_dir, f"{Path(args.dataset_filepath).stem}" + "_answers.csv")), index=False)
 ```
 
-Additional comments:
-- The input is a python dict with keys question, answer and ground_truth_answer. You can pass it as a string using json.dumps
-- Completeness evaluates whether or not the answer answers the question, while conciseness answers the question “how much of the answer is actually relevant”. If the completeness is low, then the system had trouble retrieving the relevant documents. If the conciseness is low, and the completeness is high, you are retrieving too much documents. So try to focus on improving the rank of the target document in the set of retrieved documents so that you can reduce the number of documents retrieved and reduce the noise. You could also add a reranker, which is probably a good idea in any RAG system.
-- This will return JSON, that you can easily parse with a JsonOutputParser from langchain
+You can find the full code [here](https://github.com/GTimothee/RAG_experiments/blob/main/test_procedure_for_rag/generate_answers.py)
+
+Below is an interpretation of the second part of the pseudocode, to evaluate the answers. I use two metrics, completeness and conciseness to evaluate the RAG answers. 
+
+Completeness evaluates whether or not the answer answers the question, while conciseness answers the question “how much of the answer is actually relevant”. If the completeness is low, then the system had trouble retrieving the relevant documents. If the conciseness is low, and the completeness is high, you are retrieving too much documents. So try to focus on improving the rank of the target document in the set of retrieved documents so that you can reduce the number of documents retrieved and reduce the noise. You could also add a reranker, which is probably a good idea in any RAG system.
+
+Additional comments about the evaluation prompt:
 - I tried adding some other keys like ‘comments’ or ‘reasons’ to leverage the idea of chain of thoughts, but it did not provide any useful information
 - I use floats here, but it may be that using integers from 1 to 10 instead would be more efficient or precise.
+
+```python
+df = pd.concat([
+    pd.read_csv(args.dataset_filepath),
+    pd.read_csv(args.answers_filepath)
+], axis=1)
+
+llm = OpenAI(
+    openai_api_base=os.getenv("OPENAI_BASE_URL"),
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
+    model_name="Llama-3-70B-Instruct",
+    temperature=0.0,
+)
+parser = JsonOutputParser(pydantic_object=Evaluation)
+prompt = PromptTemplate(
+    template=SYSTEM_PROMPT,
+    input_variables=["question", "answer", "ground_truth_answer"],
+    partial_variables={"format_instructions": parser.get_format_instructions()},
+)
+chain = prompt | llm | parser
+
+conciseness, completeness = 0., 0.
+ranks = []
+for row in tqdm(df.itertuples(), total=len(df), desc='Evaluating answers...'):
+    output = chain.invoke({
+        "question": row.question,
+        "answer": row.answers,
+        "ground_truth_answer": row.ground_truth_answer
+    })
+    completeness += output['completeness']
+    conciseness += output['conciseness']
+    ranks.append(row.ranks)
+
+mean_conciseness = conciseness / len(df)
+mean_completeness = completeness / len(df)
+
+print({
+    "mean_completeness": f"{round(mean_completeness*100)} %",
+    "mean_conciseness": f"{round(mean_conciseness*100)} %"
+})
+
+print(pd.Series(ranks).value_counts())
+```
+
+Again, the full code is [here](https://github.com/GTimothee/RAG_experiments/blob/main/test_procedure_for_rag/evaluate.py)
 
 ## Disclaimer: It is for Q/A evaluation
 
