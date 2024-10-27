@@ -218,6 +218,12 @@ Again, the full code is [here](https://github.com/GTimothee/RAG_experiments/blob
 
 By Q/A evaluation I mean that each question of the test set is associated to (and can be answered with) one document chunk. Consequently, this evaluation procedure is for Q/A RAG only; Indeed, if you are looking for an answer for which you must gather data from multiple chunks, this procedure would not evaluate that. Still, I believe it is a good starting point when evaluating your RAG, as if you cannot reliably find one document chunk, how could you find multiple target document chunks? You could probably start with this procedure and then add another procedure for more complex use cases.
 
+## Sources
+
+To write the examples of this blog post, I relied on these two pages: 
+- https://huggingface.co/learn/cookbook/en/advanced_rag
+- https://python.langchain.com/docs/tutorials/rag/#retrieval-and-generation-generate
+
 ## Conclusion
 
 Now you have a pretty good idea of how your RAG app performs. Now every time you want to add a document to the knowledge base, add it to the dataset and run the test. You will know how much the addition of the new chunks in the database interferes with the existing documents, and what is the performance of your RAG system on your new document.
