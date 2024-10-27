@@ -140,46 +140,76 @@ Additional comments about the evaluation prompt:
 - I use floats here, but it may be that using integers from 1 to 10 instead would be more efficient or precise.
 
 ```python
-df = pd.concat([
-    pd.read_csv(args.dataset_filepath),
-    pd.read_csv(args.answers_filepath)
-], axis=1)
+SYSTEM_PROMPT = """You are a top-tier grading software belonging to a school.
+Your task is to give a grade to evaluate the answer goodness to a given question, given the ground truth answer.
 
-llm = OpenAI(
-    openai_api_base=os.getenv("OPENAI_BASE_URL"),
-    openai_api_key=os.getenv("OPENAI_API_KEY"),
-    model_name="Llama-3-70B-Instruct",
-    temperature=0.0,
-)
-parser = JsonOutputParser(pydantic_object=Evaluation)
-prompt = PromptTemplate(
-    template=SYSTEM_PROMPT,
-    input_variables=["question", "answer", "ground_truth_answer"],
-    partial_variables={"format_instructions": parser.get_format_instructions()},
-)
-chain = prompt | llm | parser
+You will be given a piece of data containing: 
+- a 'question'
+- an 'answer': the answer to the question from the student
+- a 'ground truth answer': the expected answer to the question
 
-conciseness, completeness = 0., 0.
-ranks = []
-for row in tqdm(df.itertuples(), total=len(df), desc='Evaluating answers...'):
-    output = chain.invoke({
-        "question": row.question,
-        "answer": row.answers,
-        "ground_truth_answer": row.ground_truth_answer
+Provide your answer as a JSON with two keys: 
+- 'completeness': A float between 0 and 1. The percentage of the ground truth answer that is present in the student's answer. A score of 1 means that all the information in the 'ground truth answer' can be found in the 'answer'. No matter if the answer contains more information than expected. A score of 0 means that no information present in the 'ground truth answer' can be found in the 'answer'.
+- 'conciseness': A float between 0 and 1. The percentage of the answer that is part of the ground truth. Conciseness measures how much of the answer is really useful.
+
+Here is the data to evaluate: 
+- 'question': {question}
+- 'answer': {answer}
+- 'ground truth answer': {ground_truth_answer}
+
+Provide your answer as a JSON, with no additional text.
+"""
+
+
+class Evaluation(BaseModel):
+    completeness: float = Field(description="A float between 0 and 1. The percentage of the ground truth answer that is present in the student's answer. A score of 1 means that all the information in the 'ground truth answer' can be found in the 'answer'. No matter if the answer contains more information than expected. A score of 0 means that no information present in the 'ground truth answer' can be found in the 'answer'.")
+    conciseness: float = Field(description="A float between 0 and 1. The percentage of the answer that is part of the ground truth. Conciseness measures how much of the answer is really useful.")
+
+
+if __name__ == "__main__":
+
+    load_dotenv()
+
+    df = pd.concat([
+        pd.read_csv(args.dataset_filepath),
+        pd.read_csv(args.answers_filepath)
+    ], axis=1)
+
+    llm = OpenAI(
+        openai_api_base=os.getenv("OPENAI_BASE_URL"),
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        model_name="Llama-3-70B-Instruct",
+        temperature=0.0,
+    )
+    parser = JsonOutputParser(pydantic_object=Evaluation)
+    prompt = PromptTemplate(
+        template=SYSTEM_PROMPT,
+        input_variables=["question", "answer", "ground_truth_answer"],
+        partial_variables={"format_instructions": parser.get_format_instructions()},
+    )
+    chain = prompt | llm | parser
+
+    conciseness, completeness = 0., 0.
+    ranks = []
+    for row in tqdm(df.itertuples(), total=len(df), desc='Evaluating answers...'):
+        output = chain.invoke({
+            "question": row.question,
+            "answer": row.answers,
+            "ground_truth_answer": row.ground_truth_answer
+        })
+        completeness += output['completeness']
+        conciseness += output['conciseness']
+        ranks.append(row.ranks)
+    
+    mean_conciseness = conciseness / len(df)
+    mean_completeness = completeness / len(df)
+
+    print({
+        "mean_completeness": f"{round(mean_completeness*100)} %",
+        "mean_conciseness": f"{round(mean_conciseness*100)} %"
     })
-    completeness += output['completeness']
-    conciseness += output['conciseness']
-    ranks.append(row.ranks)
 
-mean_conciseness = conciseness / len(df)
-mean_completeness = completeness / len(df)
-
-print({
-    "mean_completeness": f"{round(mean_completeness*100)} %",
-    "mean_conciseness": f"{round(mean_conciseness*100)} %"
-})
-
-print(pd.Series(ranks).value_counts())
+    print(pd.Series(ranks).value_counts())
 ```
 
 Again, the full code is [here](https://github.com/GTimothee/RAG_experiments/blob/main/test_procedure_for_rag/evaluate.py)
