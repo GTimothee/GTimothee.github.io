@@ -18,6 +18,19 @@ Although it does not solve all your problems, a first step towards improving you
 
 This post will be useful for you in at least two ways: if you are curious about how a keyword retriever works in practice, and if, like me, you are using a database that does not have a keyword retriever included. Some might argue that I could have use the retriever from langchain but from what I understood it either loads all the documents in memory (not optimal) or needs elasticsearch as a backend, which my team and I did not want to do, as we weren't using it for anything else in the project at hand.
 
+## Whoosh
+
+[Whoosh](https://github.com/mchaput/whoosh) is a fast, pure Python search engine library designed for adding search functionality to applications. It’s often used for indexing and searching textual data within Python applications, and it’s popular in cases where a lightweight, easy-to-integrate search solution is required.
+
+Key Features of Whoosh:
+- Written in Pure Python: Whoosh is implemented entirely in Python, which makes it easy to install and run without external dependencies or a specific backend.
+- Full-Text Search: It provides full-text search capabilities, including indexing and retrieving text-based data efficiently.
+- Customizable: Whoosh is highly flexible and allows developers to customize search functionality with features like tokenizers, filters, and analyzers.
+- Simple Integration: Whoosh is lightweight and can be embedded directly into Python applications without the need for external services, making it ideal for smaller-scale applications.
+- Phrase and Boolean Search: Supports phrase searches, Boolean operators (AND, OR, NOT), and other advanced search features.
+
+Important note about Whoosh: It is now unmaintained, so you may want to use ["Whoosh Reloaded"](https://github.com/Sygil-Dev/whoosh-reloaded) instead, a fork and continuation of the Whoosh project, which is actively maintained. The code I will give here works for Whoosh as well as for Whoosh Reloaded.
+
 ## Steps for building our retriever
 
 // in progress
