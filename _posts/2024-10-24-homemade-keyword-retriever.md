@@ -21,7 +21,7 @@ This post will be useful for you in at least two ways: if you are curious about 
 ## Whoosh
 > Before diving into the practical stuff, let me introduce Whoosh, which I will use to build the keyword retriever.
 
-[Whoosh](https://github.com/mchaput/whoosh) is a popular (580 stars, 72 forks), fast, pure Python search engine library designed for adding search functionality to applications. It’s often used for indexing and searching textual data within Python applications, and it’s popular in cases where a lightweight, easy-to-integrate search solution is required.
+[Whoosh](https://github.com/mchaput/whoosh) is a popular, fast, pure Python search engine library designed for adding search functionality to applications. It’s often used for indexing and searching textual data within Python applications, and it’s popular in cases where a lightweight, easy-to-integrate search solution is required.
 
 Key Features of Whoosh:
 - Written in Pure Python: Whoosh is implemented entirely in Python, which makes it easy to install and run without external dependencies or a specific backend.
