@@ -193,12 +193,35 @@ As you can see, we retrieve the STORED fields "text_content" and "metadata" from
 
 Find the full script [here](https://github.com/GTimothee/RAG_experiments/blob/main/library/keyword_retriever.py)
 
-## The BM25 search algorithm
+## The search algorithm
 
-As you may notice, I am using the BM25F algorithm to perform the search in the index.
+As you may notice, I am using the BM25F algorithm (the default in Whoosh) to perform the search. From what I saw, only the 'frequency-based', 'TF-IDF' and 'BM25F' algorithms are supported in Whoosh. Whoosh-reloaded supports two additional algorithms: PL2 and DFREE. The BM25 algorithm is considered better than TF-IDF and is pretty robust. PL2 and DFREE can be better depending on the dataset at hand, but do not guarantee better results. 
+
+The BM25F algorithm is a variant of the BM25 algorithm that enables searching over multiple fields at the same time, which suits Whoosh well as we can define a schema with multiple fields to look into. 
+
+## Evaluation
+
+On the first 200 samples of the huggingface documentation dataset, the traditional RAG with similarity search gave: 73% mean completeness and 52% mean conciseness. Here is the associated disrtibution of the target document rank in the results:
+```
+0.0    100
+1.0     19
+3.0     11
+2.0     11
+```
+It means that for half of the samples, we were able to find the target chunk with rank 0.
+
+I tried the same pipeline, replacing the similarity search-based retriever by the keyword retriever we built. I got 80% mean completeness and 56% mean conciseness. Here is the associated disrtibution of the target document rank in the results:
+```
+0.0    132
+1.0     19
+3.0      8
+2.0      4
+```
+
+We can see that the keyword retiever actually performs better than the similarity search based retriever ! Depending on the dataset, it may not always be the case, but the point is that a keyword retriever actually performs pretty good. In a future blog post, we will combine both retrievers and add a reranker on top to get the best of both worlds and hopefully get better results than using only one of the retrievers.
 
 ## Conclusion
 
-// in progress
+We saw how to build a robust yet simple keyword retriever using Whoosh.
 
 Medium link:
