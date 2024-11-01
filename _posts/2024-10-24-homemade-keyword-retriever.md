@@ -220,6 +220,8 @@ I tried the same pipeline, replacing the similarity search-based retriever by th
 
 We can see that the keyword retiever actually performs better than the similarity search based retriever ! Depending on the dataset, it may not always be the case, but the point is that a keyword retriever actually performs pretty good. In a future blog post, we will combine both retrievers and add a reranker on top to get the best of both worlds and hopefully get better results than using only one of the retrievers.
 
+If you want the details and the code of the evaluation framework I used, checkout the dedicated [blog post](https://gtimothee.github.io/blog/2024/simple-test-procedure-for-rag/).
+
 ## Conclusion
 
 We saw how to build a robust yet simple keyword retriever using Whoosh.
