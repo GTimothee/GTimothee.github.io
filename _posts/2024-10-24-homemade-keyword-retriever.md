@@ -19,6 +19,7 @@ Although it does not solve all your problems, a first step towards improving you
 This post will be useful for you in at least two ways: if you are curious about how a keyword retriever works in practice, and if, like me, you are using a database that does not have a keyword retriever included. Some might argue that I could have use the retriever from langchain but from what I understood it either loads all the documents in memory (not optimal) or needs elasticsearch as a backend, which my team and I did not want to do, as we weren't using it for anything else in the project at hand.
 
 ## Whoosh
+> Before diving into the practical stuff, let me introduce Whoosh, which I will use to build the keyword retriever.
 
 [Whoosh](https://github.com/mchaput/whoosh) is a popular (580 stars, 72 forks), fast, pure Python search engine library designed for adding search functionality to applications. It’s often used for indexing and searching textual data within Python applications, and it’s popular in cases where a lightweight, easy-to-integrate search solution is required.
 
