@@ -57,7 +57,7 @@ The next step consists in building a Schema.
 
 > "Whoosh requires that you specify the fields of the index before you begin indexing. The Schema associates field names with metadata about the field, such as the format of the postings and whether the contents of the field are stored in the index." (Whoosh documentation)
 
-The schema represents a document in the index. We will use TEXT and STORED fields, for each document. The *TEXT* field specifies the text to be indexed. The document and its terms will be added to the reverse index. The *STORED* fields are the fields that will be retrieved, if the document is retrieved. 
+The schema represents a document in the index. We will use *TEXT* and *STORED* fields, for each document. The *TEXT* field specifies the text to be indexed. The document and its terms will be added to the reverse index. The *STORED* fields are the fields that will be retrieved, if the document is retrieved. 
 
 Here is my very simple schema:
 
@@ -108,6 +108,94 @@ writer.commit()
 ```
 
 Find the full script [here](https://github.com/GTimothee/RAG_experiments/blob/main/blogs/keyword_retriever/build_index.py)
+
+## Querying the index
+
+Now that we have the index, let us write the retriever itself. Given a query, the retrieving process is pretty simple: 
+1. preprocess the query: we want to apply the same preprocessing to the query that to the indexed documents, so that we can use the words stems for retrieval.
+2. translate the query into Whoosh query language (the same way we would translate our string into SQL for a SQL database)
+3. use that query against the index, leveraging a dedicated search algorithm
+
+To preprocess the query we remove stopwords using the *nltk* package, and we stem the words using the ```whoosh.lang.porter.stem``` function. Let us first download the stopwords (they will be downloaded only once).
+
+```python 
+import nltk 
+from nltk.corpus import stopwords
+
+stop_words = set(stopwords.words("english"))
+stop_words.add("?")
+```
+
+For step 2, it is as simple as initializing a query parser. I use a simple QueryParser, but if you have several fields you want to look into at retrieval time, you can use the MultifieldParser instead. By default, the parser matches a document that contains all the terms specified in the query (using the AND operator). For example, "physically based rendering" will be parser "physically AND based AND rendering". I change this behaviour by using the OR operator instead, and the "qparser.OrGroup.factory(0.9)" statement allows to give more weight to a document if it contains the words we are looking for multiple times.
+
+```python
+from whoosh import qparser
+from whoosh.qparser import QueryParser
+from whoosh.index import open_dir
+
+parser = QueryParser(
+    "content",
+    ix.schema,
+    group=qparser.OrGroup.factory(0.9),
+)
+ix = open_dir(index_dirpath)
+```
+
+Putting everything together, I get this preprocessing function:
+
+```python
+from nltk.tokenize import word_tokenize
+from whoosh.lang.porter import stem
+
+def _process_query(query):
+    # tokenize 
+    word_tokens = word_tokenize(query)
+    print(f"tokenized query: {word_tokens}")
+
+    # stem and filter out stop words
+    filtered_query = " ".join(
+        [
+            stem(word)
+            for word in word_tokens
+            if word.lower() not in stop_words
+        ]
+    )
+    print(f"stemmed-filtered_query: {filtered_query}")
+
+    parsed_query = parser.parse(filtered_query)
+    print(f"parsed_query: {parsed_query}")
+    return parsed_query
+```
+
+We can now use the ix.searcher method to search for the most relevant documents:
+
+```python
+from whoosh import scoring
+from langchain_core.documents import Document
+
+k = # integer representing the number of documents you want to retrieve
+query = # a string
+
+with ix.searcher(weighting=scoring.BM25F()) as searcher:
+    formatted_query = _process_query(query)
+
+    results = searcher.search(formatted_query, limit=k)
+    return [
+        Document(
+            metadata=result["metadata"], 
+            page_content=result["text_content"]
+        )
+        for result in results
+    ]
+```
+
+As you can see, we retrieve the STORED fields "text_content" and "metadata" from the schema.
+
+Find the full script [here](https://github.com/GTimothee/RAG_experiments/blob/main/library/keyword_retriever.py)
+
+## The BM25 search algorithm
+
+As you may notice, I am using the BM25F algorithm to perform the search in the index.
 
 ## Conclusion
 
