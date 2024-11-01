@@ -226,4 +226,4 @@ If you want the details and the code of the evaluation framework I used, checkou
 
 We saw how to build a robust yet simple keyword retriever using Whoosh.
 
-Medium link:
+[Medium link](https://medium.com/@timothee.guedon/motivation-b242b05c1e78)
