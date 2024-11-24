@@ -14,6 +14,16 @@ This post is an updated version of an [old post](https://www.philschmid.de/fine-
 - allowing PEFT and LoRa so that the training fits on a smaller GPU
 - adding my custom tokens so that the model understand technical documentation
 
+This blog post will follow these steps:
+1. try to reproduce the initial blog post
+2. add peft and LoRa
+3. add caching
+4. add custom tokens
+
+At each step we will be evaluating the results and comparing them to the initial results.
+
+## Reproducing the initial blog post
+
  // in progress
 
 ## References
