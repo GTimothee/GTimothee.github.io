@@ -1,0 +1,20 @@
+---
+layout: post
+title: Embedding model fine-tuning
+date: 2024-11-24 00:00:00
+description: Embedding model fine-tuning
+tags: embedding model training fine-tuning rag
+categories: rag
+---
+
+> In this blog post I show you how I fine-tune an embedding model for RAG.
+
+## Motivation
+This post is an updated version of an [old post](https://www.philschmid.de/fine-tune-embedding-model-for-rag) from Philip Schmidt. Indeed, I recently used his post as a basis to train my own embedding model for a RAG system. However, I faced two major challenges:
+- allowing PEFT and LoRa so that the training fits on a smaller GPU
+- adding my custom tokens so that the model understand technical documentation
+
+ // in progress
+
+## References
+- [Philip Schmidt's post](https://www.philschmid.de/fine-tune-embedding-model-for-rag)
