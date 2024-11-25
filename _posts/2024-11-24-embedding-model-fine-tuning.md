@@ -26,5 +26,12 @@ At each step we will be evaluating the results and comparing them to the initial
 
  // in progress
 
+tf32=True,                                  # use tf32 precision
+bf16=True,                                  # use bf16 precision
+
+creates error 
+
+ValueError: --tf32 requires Ampere or a newer GPU arch, cuda>=11 and torch>=1.7
+
 ## References
 - [Philip Schmidt's post](https://www.philschmid.de/fine-tune-embedding-model-for-rag)
