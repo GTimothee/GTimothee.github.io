@@ -33,5 +33,7 @@ creates error
 
 ValueError: --tf32 requires Ampere or a newer GPU arch, cuda>=11 and torch>=1.7
 
+if you encounter 'NameError: name 'IterableDataset' is not defined', just update sentence-transformers
+
 ## References
 - [Philip Schmidt's post](https://www.philschmid.de/fine-tune-embedding-model-for-rag)
