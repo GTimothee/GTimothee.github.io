@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Stop Learning Patterns, Start Solving Problems: Lessons from Biology and Engineering
+title: Stop Learning Patterns, Start Solving Problems - Lessons from Biology and Engineering
 date: 2025-01-23 00:00:00
 description: This blog explores the shift from rigid categorization to creative problem-solving, drawing parallels between biology's evolution and modern engineering practices.
 tags: llm rag evaluation procedure metrics
