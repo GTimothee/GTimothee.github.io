@@ -8,7 +8,7 @@ categories: engineering-experience
 ---
 
 # Stop Learning Patterns, Start Solving Problems: Lessons from Biology and Engineering
- > Throughout history, humanity’s approach to understanding and creating has shifted dramatically. From categorizing the natural world to designing complex systems, there has always been a tension between rigid frameworks and creative exploration. This shift is especially evident in two seemingly different domains: biology and engineering. Both fields have evolved from emphasizing predefined patterns to embracing problem-solving as a dynamic, imaginative process. This evolution holds valuable lessons for anyone navigating the complexities of modern innovation.
+> Throughout history, humanity’s approach to understanding and creating has shifted dramatically. From categorizing the natural world to designing complex systems, there has always been a tension between rigid frameworks and creative exploration. This shift is especially evident in two seemingly different domains: biology and engineering. Both fields have evolved from emphasizing predefined patterns to embracing problem-solving as a dynamic, imaginative process. This evolution holds valuable lessons for anyone navigating the complexities of modern innovation.
 
 ## The Era of Categorization: Biology’s Early Days
 
