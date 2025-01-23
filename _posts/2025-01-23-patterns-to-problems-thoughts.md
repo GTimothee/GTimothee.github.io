@@ -39,3 +39,5 @@ The key takeaway from both biology and engineering is this: predefined patterns 
 For students in AI, I would recommend not spending too much time learning patterns or design recommendations. Instead, focus on solving problems and understanding the foundational principles and mathematics behind a subject. When you engage directly with challenges, the patterns will arise naturally.
 
 I’ve experienced this myself when learning about different types of recurrent neural networks (RNNs). Early on, I spent too much time trying to memorize the various types and their applications. But when I shifted my mindset and started thinking about real-world problems, the patterns became obvious. For example, in translation tasks, it’s clear that the architecture naturally forms an N-to-N schema. By focusing on applications and problem-solving, you’ll gain a deeper understanding and develop solutions that fit your unique use cases. So, let go of rigid frameworks, and let curiosity and creativity guide your learning journey.
+
+Medium link: https://medium.com/@timothee.guedon/stop-learning-patterns-start-solving-problems-lessons-from-biology-and-engineering-d663c35a834c
