@@ -29,13 +29,10 @@ From my experience working on AI agents, I’ve found that the most valuable ins
 
 The key takeaway from both biology and engineering is this: predefined patterns can inspire, but they shouldn’t constrain. Here’s why problem-solving is a more effective approach:
 
-Creativity Thrives Without Limits: When you’re not bound by established patterns, you’re free to explore unconventional solutions. This often leads to breakthroughs that wouldn’t arise within rigid frameworks.
-
-Patterns Are Context-Specific: What works in one scenario might not work in another. Discovering solutions tailored to your unique challenges ensures better outcomes.
-
-Learning by Doing: Problem-solving fosters deeper understanding. Instead of memorizing abstract patterns, you gain hands-on experience that stays with you.
-
-Flexibility in Innovation: When new challenges arise, a problem-solving mindset equips you to adapt, while a pattern-driven approach may leave you stuck searching for the “right” template.
+- Creativity Thrives Without Limits: When you’re not bound by established patterns, you’re free to explore unconventional solutions. This often leads to breakthroughs that wouldn’t arise within rigid frameworks.
+- Patterns Are Context-Specific: What works in one scenario might not work in another. Discovering solutions tailored to your unique challenges ensures better outcomes.
+- Learning by Doing: Problem-solving fosters deeper understanding. Instead of memorizing abstract patterns, you gain hands-on experience that stays with you.
+- Flexibility in Innovation: When new challenges arise, a problem-solving mindset equips you to adapt, while a pattern-driven approach may leave you stuck searching for the “right” template.
 
 ## Conclusion
 
