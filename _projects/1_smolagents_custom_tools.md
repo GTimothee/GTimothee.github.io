@@ -1,7 +1,7 @@
 ---
 layout: page
-title: smolagent custom tools
-description: with background image
+title: Smolagent custom tools
+description: Tools I built and shared with the community while building an agent with the smolagents library.
 img: assets/img/12.jpg
 importance: 1
 category: ai-agents
