@@ -5,11 +5,8 @@ description: Tools I built and shared with the community while building an agent
 img: assets/img/12.jpg
 importance: 1
 category: ai-agents
-related_publications: true
+related_publications: false
 ---
-
-Tools I built and shared with the community while building an agent with the smolagents library.
-
 - Speech to text tool:
     - https://huggingface.co/spaces/GTimothee/hf_speech2text_tool
     - This is a tool that returns text transcription from an audio file path, calling huggingface-api under the hood.
