@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Hello world
+title: New repo on RAG experiments
 date: 2024-10-27 12:00:00-0100
 inline: false
 related_posts: false
