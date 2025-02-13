@@ -2,7 +2,7 @@
 layout: page
 title: Knowledge graphs project
 description: Experimenting with knowledge graphs and RAG applications
-img: assets/img/12.jpg
+img: assets/img/graph.png
 importance: 1
 category: RAG
 related_publications: false
@@ -38,12 +38,12 @@ I gave some input text to ingest:
 
 The text gets processed and converted into graph objects:
 
-[ui_img](assets/img/12.jpg)
+[ui_img](assets/img/generation.png)
 
 We can see the resulting graph in the Neo4j UI:
 
-[ui_img](assets/img/12.jpg)
+[ui_img](assets/img/graph.png)
 
 Finally, I tried a query, and the result is pretty satisfying !
 
-[ui_img](assets/img/12.jpg)
+[ui_img](assets/img/query_output.png)
