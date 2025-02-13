@@ -38,12 +38,12 @@ I gave some input text to ingest:
 
 The text gets processed and converted into graph objects:
 
-[ui_img](assets/img/generation.png)
+{% include figure.liquid loading="eager" path="assets/img/generation.png" title="ingestion page" class="img-fluid rounded z-depth-1" %} 
 
 We can see the resulting graph in the Neo4j UI:
 
-[ui_img](assets/img/graph.png)
+{% include figure.liquid loading="eager" path="assets/img/graph.png" title="resulting graph" class="img-fluid rounded z-depth-1" %} 
 
 Finally, I tried a query, and the result is pretty satisfying !
 
-[ui_img](assets/img/query_output.png)
+{% include figure.liquid loading="eager" path="assets/img/query_output.png" title="querying the graph" class="img-fluid rounded z-depth-1" %} 
