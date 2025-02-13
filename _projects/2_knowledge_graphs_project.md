@@ -47,3 +47,8 @@ We can see the resulting graph in the Neo4j UI:
 Finally, I tried a query, and the result is pretty satisfying !
 
 {% include figure.liquid loading="eager" path="assets/img/query_output.png" title="querying the graph" class="img-fluid rounded z-depth-1" %} 
+
+## Some lessons learnt from this project
+
+- As huggingface recommends, outputting code instead of JSON or formatted text like in neo4j tutorials proves to be more reliable.
+- The main challenge is how to generate the graph objects from the input text. Instead of using a single prompt to extract data and do the conversion into Cypher I broke it down into several steps. Indeed, I remarked that generating Cypher is complicated for the LLM, so it struggles to do everything reliably at once. That is why I made the formatting into Cypher query an independent step.
