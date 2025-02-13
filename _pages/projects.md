@@ -5,7 +5,7 @@ permalink: /projects/
 description: My last projects
 nav: true
 nav_order: 3
-display_categories: [ai-agents]
+display_categories: [ai-agents, RAG]
 horizontal: false
 ---
 
