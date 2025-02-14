@@ -44,11 +44,24 @@ We can see the resulting graph in the Neo4j UI:
 
 {% include figure.liquid loading="eager" path="assets/img/graph.png" title="resulting graph" class="img-fluid rounded z-depth-1" %} 
 
-Finally, I tried a query, and the result is pretty satisfying !
+Finally, I tried a query in natural language, and the result is pretty satisfying !
 
 {% include figure.liquid loading="eager" path="assets/img/query_output.png" title="querying the graph" class="img-fluid rounded z-depth-1" %} 
+
+{% include figure.liquid loading="eager" path="assets/img/query_output2.png" title="querying the graph" class="img-fluid rounded z-depth-1" %} 
+
+## Improving the draft
+### Grouping attribute nodes
+Looking at the graph, something directly catches my eyes: we have lots of nodes linked to our main node "Pretraining" with the same relationship "has_challenge" or "has_example". 
+From my human point of vue when I am looking at the graph (and when I will be searching it later) I would prefer to see a group node like "pretraining examples" linked to the Pretraining node, and directing to all the examples.
+It has several advantages: 
+- if i ask myself what do i have in DB about a particular concept I can just retrieve the 1st connected nodes and I will get all the information like : "definition", "examples", "related concepts", "applications".
+- hopefully it may reduce the probability of missing an interesting node. For example if I want ALL the examples for a certain concept and I get only 10 results maximum, I cannot retrieve all interesting data if there are > 10 examples. I could increase the number of results fetched or go deeper in the graph, but it seems more optimal to me to just fetch the concept node and its first level relatives first using vector search for example, and then fetch all the examples using a precise and simple cypher query.
+- i can implement that when i do a search, whenever I collect a group node, I must collect all related nodes
 
 ## Some lessons learnt from this project
 
 - As huggingface recommends, outputting code instead of JSON or formatted text like in neo4j tutorials proves to be more reliable.
-- The main challenge is how to generate the graph objects from the input text. Instead of using a single prompt to extract data and do the conversion into Cypher I broke it down into several steps. Indeed, I remarked that generating Cypher is complicated for the LLM, so it struggles to do everything reliably at once. That is why I made the formatting into Cypher query an independent step.
+- The main challenge is how to generate the graph objects from the input text.
+  - Instead of using a single prompt to extract data and do the conversion into Cypher I broke it down into several steps. Indeed, I remarked that generating Cypher is complicated for the LLM, so it struggles to do everything reliably at once. That is why I made the formatting into Cypher query an independent step.
+  - One must think about the application when building the graph. Depending on the application, nodes and relationships do not have the same meaning. I struggled a bit before understanding how I wanted to create my knowledge base; considering nodes as concepts and relationships as attributes.
