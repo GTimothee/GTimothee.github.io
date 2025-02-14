@@ -2,7 +2,7 @@
 layout: page
 title: Knowledge graphs project
 description: Experimenting with knowledge graphs and RAG applications
-img: assets/img/graph.png
+img: assets/img/resultaggregation.png
 importance: 1
 category: RAG
 related_publications: false
@@ -46,9 +46,9 @@ We can see the resulting graph in the Neo4j UI:
 
 Finally, I tried a query in natural language, and the result is pretty satisfying !
 
-{% include figure.liquid loading="eager" path="assets/img/query_output.png" title="querying the graph" class="img-fluid rounded z-depth-1" %} 
+{% include figure.liquid loading="eager" path="assets/img/query_output.png" title="querying the graph, first example" class="img-fluid rounded z-depth-1" %} 
 
-{% include figure.liquid loading="eager" path="assets/img/query_output2.png" title="querying the graph" class="img-fluid rounded z-depth-1" %} 
+{% include figure.liquid loading="eager" path="assets/img/query_output2.png" title="querying the graph, second example" class="img-fluid rounded z-depth-1" %} 
 
 ## Improving the draft
 ### Grouping attribute nodes
@@ -58,6 +58,8 @@ It has several advantages:
 - if i ask myself what do i have in DB about a particular concept I can just retrieve the 1st connected nodes and I will get all the information like : "definition", "examples", "related concepts", "applications".
 - hopefully it may reduce the probability of missing an interesting node. For example if I want ALL the examples for a certain concept and I get only 10 results maximum, I cannot retrieve all interesting data if there are > 10 examples. I could increase the number of results fetched or go deeper in the graph, but it seems more optimal to me to just fetch the concept node and its first level relatives first using vector search for example, and then fetch all the examples using a precise and simple cypher query.
 - i can implement that when i do a search, whenever I collect a group node, I must collect all related nodes
+
+{% include figure.liquid loading="eager" path="assets/img/resultaggregation.png" title="aggregation result" class="img-fluid rounded z-depth-1" %} 
 
 ## Some lessons learnt from this project
 
