@@ -51,15 +51,21 @@ Finally, I tried a query in natural language, and the result is pretty satisfyin
 {% include figure.liquid loading="eager" path="assets/img/query_output2.png" title="querying the graph, second example" class="img-fluid rounded z-depth-1" %} 
 
 ## Improving the draft
-### Grouping attribute nodes
-Looking at the graph, something directly catches my eyes: we have lots of nodes linked to our main node "Pretraining" with the same relationship "has_challenge" or "has_example". 
-From my human point of vue when I am looking at the graph (and when I will be searching it later) I would prefer to see a group node like "pretraining examples" linked to the Pretraining node, and directing to all the examples.
-It has several advantages: 
-- if i ask myself what do i have in DB about a particular concept I can just retrieve the 1st connected nodes and I will get all the information like : "definition", "examples", "related concepts", "applications".
-- hopefully it may reduce the probability of missing an interesting node. For example if I want ALL the examples for a certain concept and I get only 10 results maximum, I cannot retrieve all interesting data if there are > 10 examples. I could increase the number of results fetched or go deeper in the graph, but it seems more optimal to me to just fetch the concept node and its first level relatives first using vector search for example, and then fetch all the examples using a precise and simple cypher query.
-- i can implement that when i do a search, whenever I collect a group node, I must collect all related nodes
+### Grouping attribute nodes - false good idea
+I tried grouping relationships under group nodes to improve visualization in neo4j browser but I did not think about the resulting increase of cmoplexity for the queries, so it was a bad idea. I think my main mistake was not thinking in terms of graph. Intuitively, it seems logical to group all examples under a same Examples node, retrieving attributes for a given node, seeing that it has an Examples node and then retrieving just this node, if I am looking for examples. Unfortunately in terms of graph traversal it means at least two hops for the query where by default it would only have been one hop.
+
+Here is how it looked like:
 
 {% include figure.liquid loading="eager" path="assets/img/resultaggregation.png" title="aggregation result" class="img-fluid rounded z-depth-1" %} 
+
+### Updating existing data
+The next main challenge I face is how to add new data. 
+- how to prevent duplicate nodes and duplicate relationships? Not only perfect duplicates (which are the easiest to find) but also names that are almost the same or have the same meaning.
+- how to fuse a new subgraph of knowledge into our current graph?
+
+### Exploring queries on graph
+We now want to explore the different ways to make queries on graph. 
+- What queries work? What does not work? How can I fix it?
 
 ## Some lessons learnt from this project
 
