@@ -11,9 +11,11 @@ categories: rag
 
 ## graph building from unstructured text
 
-1. Convert your chunks to Document
+1. Convert your chunks to Nodes (See documentation on Documents and Nodes here https://docs.llamaindex.ai/en/stable/module_guides/loading/documents_and_nodes/#documents-nodes)
 2. select an extractor SimpleLLMPathExtractor
 3. create a PropertyGraphIndex using the extractor on the list of documents
+
+
 
 ## querying
 
