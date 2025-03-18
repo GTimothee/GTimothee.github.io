@@ -18,6 +18,15 @@ categories: rag
   - If no sub-retrievers are provided, the defaults are LLMSynonymRetriever and VectorContextRetriever (if embeddings are enabled)
 - default store (in memory ) does not support embeddings, you need to use one of Neo4jPropertyGraphStore, TiDBPropertyGraphStore, FalkorDBPropertyGraphStore
 
+base store: SimplePropertyGraphStore
+- EntityNode, Relation are nodes and relationships extracted from chunk
+- EntityNode are linked to their source chunk modeled as TextNode using Relation with label HAS_SOURCE
+
+interesting methods:
+- graph_store.get_rel_map([entity_node], depth=2): gets triples up to a certain depth
+- graph_store.get_llama_nodes(['id1']): gets the original text nodes
+- graph_store.structured_query("<cypher query>") - runs a cypher query (assuming the graph store supports it)
+
 overview of useful extractors:
 - SimpleLLMPathExtractor: simple extractor of `subject,predicate,object` triples, with a max_paths_per_chunk argument
 - DynamicLLMPathExtractor: like neo4j approach, using node types
@@ -66,6 +75,8 @@ build_index_from_nodes
   returns index_struct
 
 ### _build_index_from_nodes implementation in propertygraphindex
+
+when talking about "llama nodes" they talk about the TextNodes representing chunks
 
 self._insert_nodes(nodes or [])
   applies kg extractors on nodes
