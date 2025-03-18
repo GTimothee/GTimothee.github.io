@@ -1,7 +1,7 @@
 ---
 layout: post
 title: graphRAG implementation in Llama Index
-date: 2025-17-03 00:00:00
+date: 2025-03-17 00:00:00
 description: The goal is to understand the implementation of graphRAG by llamaindex.
 tags: rag 
 categories: rag
