@@ -69,26 +69,29 @@ arguments:
 - default is to embed_kg_nodes (True)
 - show_progress for progress bar
 
+
 build_index_from_nodes 
-  add nodes to docstore
-  _build_index_from_nodes: an abstract class implemented in propertygraphindex
-  returns index_struct
+  - add nodes to docstore
+  - _build_index_from_nodes: an abstract class implemented in propertygraphindex
+  - returns index_struct
 
 ### _build_index_from_nodes implementation in propertygraphindex
 
 when talking about "llama nodes" they talk about the TextNodes representing chunks
 
+
 self._insert_nodes(nodes or [])
-  applies kg extractors on nodes
-  builds two lists : one with all nodes and one with all relationships
-  filters pure node duplciates between our list of all nodes and the list of nodes already in the store (filter applied on "node.id")
-  filter out duplicate llama nodes 
-  if _embed_kg_nodes:
-    embed nodes
-    embed llama nodes
-  insert lalma nodes in property graph
-  insert nodes in property graph
-  insert relationships in property graphs
+  - applies kg extractors on nodes
+  - builds two lists : one with all nodes and one with all relationships
+  - filters pure node duplciates between our list of all nodes and the list of nodes already in the store (filter applied on "node.id")
+  - filter out duplicate llama nodes 
+  - if _embed_kg_nodes:
+    - embed nodes
+    - embed llama nodes
+  - insert lalma nodes in property graph
+  - insert nodes in property graph
+  - insert relationships in property graphs
+
 
 llama nodes are ChunkNode(s) from Llama-index
 
@@ -96,6 +99,9 @@ llama nodes are ChunkNode(s) from Llama-index
 
 1. create query engine from the index
 2. just call the query engine with the query
+
+
+- possible response modes: https://docs.llamaindex.ai/en/stable/module_guides/deploying/query_engine/response_modes/
 
 ## Implementation tips
 
