@@ -7,8 +7,6 @@ tags: rag
 categories: rag
 ---
 
-// work in progress
-
 # High level result of investigation
 
 - Each chunk is a llama index Node
@@ -33,6 +31,8 @@ overview of useful extractors:
 
 All retrievers currently include: 
 - LLMSynonymRetriever: retrieve based on LLM generated keywords/synonyms
+  - a prompt to extract synonyms
+  - fetch matching kg nodes (not llama nodes) and apply get_rel_map on them (gets triples up to a certain depth) => get nodes and neighborhood in form of triplets, then convert triplets to NodeWithScore
 - VectorContextRetriever: retrieve based on embedded graph nodes
 - TextToCypherRetriever: ask the LLM to generate cypher based on the schema of the property graph
   - NOTE: Since the SimplePropertyGraphStore is not actually a graph database, it does not support cypher queries.
@@ -69,7 +69,6 @@ arguments:
 - default is to embed_kg_nodes (True)
 - show_progress for progress bar
 
-
 build_index_from_nodes 
   - add nodes to docstore
   - _build_index_from_nodes: an abstract class implemented in propertygraphindex
@@ -98,10 +97,32 @@ llama nodes are ChunkNode(s) from Llama-index
 ## querying
 
 1. create query engine from the index
+  - possible response modes: https://docs.llamaindex.ai/en/stable/module_guides/deploying/query_engine/response_modes/
+  - if you want to tune it, construct it yourself instead of using the as_query_engine method as it lacks parameters
 2. just call the query engine with the query
+  1. creates a query bundle from the query (see below)
+  2. calls the _query implementation of the query engine you chose
 
+Implementation of _query for the default RetrieverQueryEngine:
+```
+nodes = self.retrieve(query_bundle)
+response = self._response_synthesizer.synthesize(
+    query=query_bundle,
+    nodes=nodes,
+)
+```
 
-- possible response modes: https://docs.llamaindex.ai/en/stable/module_guides/deploying/query_engine/response_modes/
+The retriever just applies the retrievers that have been registered, and somehow (could not find where it is called but found the method) it also retrieves the source nodes (chunk nodes) for each triplet found. As a result you get the triplets found AND the source texts in your retrieved nodes. I do see it in my code, too.
+  
+Query bundle: 
+  Can embed strings and images (give the image_path parameter)
+  
+  query_str (str): the original user-specified query string.
+      This is currently used by all non embedding-based queries.
+  custom_embedding_strs (list[str]): list of strings used for embedding the query.
+      This is currently used by all embedding-based queries.
+  embedding (list[float]): the stored embedding for the query.
+
 
 ## Implementation tips
 
