@@ -7,7 +7,49 @@ tags: rag
 categories: rag
 ---
 
-# High level result of investigation
+// in progress
+
+## Clean version
+
+Here is a graphRAG guide with llama index.
+
+### 1. Load your data
+ref: https://docs.llamaindex.ai/en/v0.10.19/module_guides/loading/node_parsers/modules.html
+
+- Loading from files ? use FlatFileReader to load the files
+- Loading from memory (.e.g. loading from a dataframe) ? go directly to step 2
+
+### 2. Initial preprocessing
+
+#### Transformations
+
+Transformations take nodes as input and outputs nodes. 
+
+It can be used to perform preprocessing like chunking or metadata extraction for example.
+
+#### Chunking
+Utilities for splitting are called splitters.
+
+ref: https://docs.llamaindex.ai/en/v0.10.19/module_guides/loading/node_parsers/modules.html
+
+- Loading from files ? use SimpleFileNodeParser on the docs you retrieved with FlatFileReader. It will use the best splitter regarding the extension of the file you loaded.
+- Loading from memory ? choose the best splitter depending on your data
+  - simple text: TokenTextSplitter, SentenceSplitter (split on sentences, with overlap), SentenceWindowNodeParser (split on sentences, with sentence-level overlap put in metadata), MarkdownNodeParser, SemanticSplitterNodeParser (by Greg Kamradt, requires an embedding model)
+  - special format: JSONNodeParser, HTMLNodeParser, CodeSplitter
+  - meh: HierarchicalNodeParser (advanced)
+
+#### Metadata extraction 
+
+#### Defining our transformations
+
+Define the transformations globally (through the Settings) or pass the transformations list in the constructor of the index.
+
+### 3. Initial preprocessing
+
+------
+
+## Research notes
+### High level result of investigation
 
 - Each chunk is a llama index Node
 - For each chunk, we extract nodes and relationships and add them to the chunk (Node) metadata
@@ -52,18 +94,18 @@ retriever = PGRetriever(sub_retrievers=sub_retrievers)
 
 Source: https://docs.llamaindex.ai/en/stable/module_guides/indexing/lpg_index_guide/
 
-# Implementation break down used for investigation
+### Implementation break down used for investigation
 
-## graph building from unstructured text
+#### graph building from unstructured text
 
 1. docs = [Document(text=sample['text']) for sample in docs]
 2. PropertyGraphIndex.from_documents
 
-### "from_documents" inner workings: 
+##### "from_documents" inner workings: 
 1. Convert your docs to chunks (=Nodes) (See documentation on Documents and Nodes here https://docs.llamaindex.ai/en/stable/module_guides/loading/documents_and_nodes/#documents-nodes) using "transformations" (passed as argument or DEFAULTs TO Settings.transformations.
 2. create the instance form the nodes (means you could have parse your documents yourself and create the instance yourself with the constructor)
 
-### Constructor call
+##### Constructor call
 arguments:
 - kg_extractors:A list of transformations to apply to the nodes to extract triplets. Defaults to [SimpleLLMPathExtractor(llm=llm), ImplicitEdgeExtractor()]
 - default is to embed_kg_nodes (True)
@@ -74,7 +116,7 @@ build_index_from_nodes
   - _build_index_from_nodes: an abstract class implemented in propertygraphindex
   - returns index_struct
 
-### _build_index_from_nodes implementation in propertygraphindex
+##### _build_index_from_nodes implementation in propertygraphindex
 
 when talking about "llama nodes" they talk about the TextNodes representing chunks
 
@@ -94,7 +136,7 @@ self._insert_nodes(nodes or [])
 
 llama nodes are ChunkNode(s) from Llama-index
 
-## querying
+#### querying
 
 1. create query engine from the index
   - possible response modes: https://docs.llamaindex.ai/en/stable/module_guides/deploying/query_engine/response_modes/
@@ -124,6 +166,6 @@ Query bundle:
   embedding (list[float]): the stored embedding for the query.
 
 
-## Implementation tips
+#### Implementation tips
 
 - use Settings to define llm and embedding project wide
