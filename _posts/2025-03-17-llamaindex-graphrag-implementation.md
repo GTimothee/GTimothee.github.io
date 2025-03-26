@@ -111,12 +111,19 @@ Definition of an index from the docs:
 
 Indexes: 
 - VectorStoreIndex: allows for vector search, computing embeddings for each chunk
-- KnowledgeGraphIndex 
 - PropertyGraphIndex
   - collection of labelled nodes linked together by relationships
   - labelled nodes have properties
   - to build property graph you define a list of kg_extractors that will be applied on each chunk
   - extracted data are added as metadata to the input chunk (called "llama-index" nodes, they are just the input text chunks you feed)
+
+Note on KnowledgeGraphIndex:
+- You may also see KnowledgeGraphIndex in the docs, it is the previous version of PropertyGraphIndex.
+- "expands our knowledge graph capabilities to be more flexible, extendible, and robust." (More info in the following [blog post](https://www.llamaindex.ai/blog/introducing-the-property-graph-index-a-powerful-new-way-to-build-knowledge-graphs-with-llms))
+- New features introduced with PropertyGraphIndex:
+  - Assign labels and properties to nodes and relationships
+  - Represent text nodes as vector embeddings
+  - Perform both vector and symbolic retrieval
 
 Example with propertygraphindex:
 ```python
