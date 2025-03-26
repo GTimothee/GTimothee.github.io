@@ -7,44 +7,113 @@ tags: rag
 categories: rag
 ---
 
-// in progress
+## A graphRAG guide with llama index
 
-## Clean version
+### 1. Loading the data
 
-Here is a graphRAG guide with llama index.
-
-### 1. Load your data
-ref: https://docs.llamaindex.ai/en/v0.10.19/module_guides/loading/node_parsers/modules.html
-
-- Loading from files ? use FlatFileReader to load the files
-- Loading from memory (.e.g. loading from a dataframe) ? go directly to step 2
+- Input: files or data in memory
+- Methods:
+  - Loading from files ? use SimpleDirectoryReader or FlatFileReader to load the files
+  - Loading from memory (.e.g. loading from a dataframe) ? go directly to step 2
+- Output: "Nodes" representing documents
+- Ref: https://docs.llamaindex.ai/en/v0.10.19/module_guides/loading/node_parsers/modules.html
 
 ### 2. Initial preprocessing
 
 #### Transformations
 
-Transformations take nodes as input and outputs nodes. 
-
-It can be used to perform preprocessing like chunking or metadata extraction for example.
+- Input: Nodes
+- Transformations can be used to perform preprocessing like chunking or metadata extraction for example.
+- Output: Nodes
+- Ref: https://docs.llamaindex.ai/en/stable/module_guides/loading/ingestion_pipeline/transformations/
 
 #### Chunking
-Utilities for splitting are called splitters.
 
-ref: https://docs.llamaindex.ai/en/v0.10.19/module_guides/loading/node_parsers/modules.html
+A type of transformation. Utilities for splitting are called splitters.
 
 - Loading from files ? use SimpleFileNodeParser on the docs you retrieved with FlatFileReader. It will use the best splitter regarding the extension of the file you loaded.
 - Loading from memory ? choose the best splitter depending on your data
   - simple text: TokenTextSplitter, SentenceSplitter (split on sentences, with overlap), SentenceWindowNodeParser (split on sentences, with sentence-level overlap put in metadata), MarkdownNodeParser, SemanticSplitterNodeParser (by Greg Kamradt, requires an embedding model)
   - special format: JSONNodeParser, HTMLNodeParser, CodeSplitter
-  - meh: HierarchicalNodeParser (advanced)
+  - meh: HierarchicalNodeParser (advanced, will see later)
+ 
+ref: https://docs.llamaindex.ai/en/v0.10.19/module_guides/loading/node_parsers/modules.html
 
 #### Metadata extraction 
 
-#### Defining our transformations
+Adds metadata to the chunks.
 
-Define the transformations globally (through the Settings) or pass the transformations list in the constructor of the index.
+- Allows:
+  - better context for the llm to generate an answer (""chunk dreaming" - each individual chunk can have more "holistic" details, leading to higher answer quality given retrieved results.")
+  - using metadata to improve the search ("disambiguate similar-looking passages.")
+- Example extractors:
+  - SummaryExtractor: extracts summaries, not only within the current text, but also within adjacent texts.
+  - QuestionsAnsweredExtractor: creates hypothetical question embeddings relevant to the document chunk
+  - TitleExtractor: in case the file name is not perfect, which happens a lot, you may want to extrapolate a file name representative of the content
+  - KeywordExtractor: "extracts entities (i.e. names of places, people, things) mentioned in the content of each Node"
+    - default extraction model : https://huggingface.co/tomaarsen/span-marker-mbert-base-multinerd
+    - will use these keywords during the search
+    - See example here: https://docs.llamaindex.ai/en/stable/examples/metadata_extraction/EntityExtractionClimate/
+  - BaseExtractor: to build your own
+- third-party extractors: allows to define what you are looking for as an object. You can therefore reproduce all the above extractors and more!
+  - MarvinMetadataExtractor
+  - PydanticProgramExtractor
+- Ref: https://docs.llamaindex.ai/en/stable/module_guides/indexing/metadata_extraction/
+- Ref: https://docs.llamaindex.ai/en/stable/examples/metadata_extraction/...
 
-### 3. Initial preprocessing
+#### Example implementation
+
+```
+from llama_index.core.extractors import (
+    SummaryExtractor,
+    TitleExtractor,
+    KeywordExtractor,
+    QuestionsAnsweredExtractor
+)
+from llama_index.extractors.entity import EntityExtractor
+from llama_index.core.node_parser import TokenTextSplitter
+from llama_index.core import SimpleDirectoryReader
+from llama_index.core.ingestion import IngestionPipeline
+
+# chunking
+text_splitter = TokenTextSplitter(
+    separator=" ", chunk_size=512, chunk_overlap=128
+)
+
+# metadata extraction
+extractors = [
+    TitleExtractor(nodes=5, llm=llm),
+    QuestionsAnsweredExtractor(questions=3, llm=llm),
+    EntityExtractor(prediction_threshold=0.5),
+    SummaryExtractor(summaries=["prev", "self"], llm=llm),
+    KeywordExtractor(keywords=10, llm=llm)
+]
+
+# concat transformations
+transformations = [text_splitter] + extractors
+
+uber_docs = SimpleDirectoryReader(input_files=["data/10k-132.pdf"]).load_data()
+pipeline = IngestionPipeline(transformations=transformations, in_place=False, show_progress=True)
+uber_nodes = pipeline.run(documents=uber_docs)
+uber_nodes[1].metadata
+```
+
+Example output:
+//TODO
+
+Note: You can also define the transformations globally using the 'Settings' object.
+
+### 3. Building an index
+
+Definition of an index from the docs:
+- "With your data loaded, you now have a list of Document objects (or a list of Nodes). It's time to build an Index over these objects so you can start querying them."
+- "In LlamaIndex terms, an Index is a data structure composed of Document objects, designed to enable querying by an LLM. Your Index is designed to be complementary to your querying strategy."
+
+Examples: 
+- VectorStoreIndex: allows for vector search, computing embeddings for each chunk
+- KnowledgeGraphIndex (that is what we are interested in here)
+
+- Ref: https://docs.llamaindex.ai/en/stable/understanding/indexing/indexing/
 
 ------
 
