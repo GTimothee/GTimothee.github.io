@@ -2,32 +2,30 @@
 layout: post
 title: graphRAG implementation in Llama Index
 date: 2025-03-17 00:00:00
-description: The goal is to understand the implementation of graphRAG by llamaindex.
+description: A graphRAG guide with llama index
 tags: rag 
 categories: rag
 ---
 
-## A graphRAG guide with llama index
-
-### 1. Loading the data
+## 1. Loading the data
 
 - Input: files or data in memory
 - Methods:
   - Loading from files ? use SimpleDirectoryReader or FlatFileReader to load the files
-  - Loading from memory (.e.g. loading from a dataframe) ? go directly to step 2
+  - Loading from memory (.e.g. loading from a dataframe) ? convert data to Documents (```docs = [Document(text=sample['text']) for sample in docs]```)
 - Output: "Nodes" representing documents
 - Ref: https://docs.llamaindex.ai/en/v0.10.19/module_guides/loading/node_parsers/modules.html
 
-### 2. Initial preprocessing
+## 2. Initial preprocessing
 
-#### Transformations
+### Transformations
 
 - Input: Nodes
 - Transformations can be used to perform preprocessing like chunking or metadata extraction for example.
 - Output: Nodes
 - Ref: https://docs.llamaindex.ai/en/stable/module_guides/loading/ingestion_pipeline/transformations/
 
-#### Chunking
+### Chunking
 
 A type of transformation. Utilities for splitting are called splitters.
 
@@ -39,7 +37,7 @@ A type of transformation. Utilities for splitting are called splitters.
  
 ref: https://docs.llamaindex.ai/en/v0.10.19/module_guides/loading/node_parsers/modules.html
 
-#### Metadata extraction 
+### Metadata extraction 
 
 Adds metadata to the chunks.
 
@@ -61,9 +59,9 @@ Adds metadata to the chunks.
 - Ref: https://docs.llamaindex.ai/en/stable/module_guides/indexing/metadata_extraction/
 - Ref: https://docs.llamaindex.ai/en/stable/examples/metadata_extraction/...
 
-#### Example implementation
+### Example implementation
 
-```
+```python
 from llama_index.core.extractors import (
     SummaryExtractor,
     TitleExtractor,
@@ -103,128 +101,98 @@ Example output:
 
 Note: You can also define the transformations globally using the 'Settings' object.
 
-### 3. Building an index
+## 3. Building an index
 
 Definition of an index from the docs:
 - "With your data loaded, you now have a list of Document objects (or a list of Nodes). It's time to build an Index over these objects so you can start querying them."
 - "In LlamaIndex terms, an Index is a data structure composed of Document objects, designed to enable querying by an LLM. Your Index is designed to be complementary to your querying strategy."
+- The index include a "store" which is where the data will be saved. By default it is in memory but you can also store on disk or in a database.
+- We then query the index.
 
-Examples: 
+Indexes: 
 - VectorStoreIndex: allows for vector search, computing embeddings for each chunk
-- KnowledgeGraphIndex (that is what we are interested in here)
+- KnowledgeGraphIndex 
+- PropertyGraphIndex
+  - collection of labelled nodes linked together by relationships
+  - labelled nodes have properties
+  - to build property graph you define a list of kg_extractors that will be applied on each chunk
+  - extracted data are added as metadata to the input chunk (called "llama-index" nodes, they are just the input text chunks you feed)
 
-- Ref: https://docs.llamaindex.ai/en/stable/understanding/indexing/indexing/
-
-------
-
-## Research notes
-### High level result of investigation
-
-- Each chunk is a llama index Node
-- For each chunk, we extract nodes and relationships and add them to the chunk (Node) metadata
-- Extractors are documented here: https://docs.llamaindex.ai/en/stable/module_guides/indexing/lpg_index_guide/#default-simplellmpathextractor
-- in LlamaIndex, we can combine several node retrieval methods at once
-  - If no sub-retrievers are provided, the defaults are LLMSynonymRetriever and VectorContextRetriever (if embeddings are enabled)
-- default store (in memory ) does not support embeddings, you need to use one of Neo4jPropertyGraphStore, TiDBPropertyGraphStore, FalkorDBPropertyGraphStore
-
-base store: SimplePropertyGraphStore
-- EntityNode, Relation are nodes and relationships extracted from chunk
-- EntityNode are linked to their source chunk modeled as TextNode using Relation with label HAS_SOURCE
-
-interesting methods:
-- graph_store.get_rel_map([entity_node], depth=2): gets triples up to a certain depth
-- graph_store.get_llama_nodes(['id1']): gets the original text nodes
-- graph_store.structured_query("<cypher query>") - runs a cypher query (assuming the graph store supports it)
-
-overview of useful extractors:
-- SimpleLLMPathExtractor: simple extractor of `subject,predicate,object` triples, with a max_paths_per_chunk argument
-- DynamicLLMPathExtractor: like neo4j approach, using node types
-
-All retrievers currently include: 
-- LLMSynonymRetriever: retrieve based on LLM generated keywords/synonyms
-  - a prompt to extract synonyms
-  - fetch matching kg nodes (not llama nodes) and apply get_rel_map on them (gets triples up to a certain depth) => get nodes and neighborhood in form of triplets, then convert triplets to NodeWithScore
-- VectorContextRetriever: retrieve based on embedded graph nodes
-- TextToCypherRetriever: ask the LLM to generate cypher based on the schema of the property graph
-  - NOTE: Since the SimplePropertyGraphStore is not actually a graph database, it does not support cypher queries.
-- CypherTemplateRetriever: use a cypher template with params inferred by the LLM
-  - This is a more constrained version of the TextToCypherRetriever. Rather than letting the LLM have free-range of generating any cypher statement, we can instead provide a cypher template and have the LLM fill in the blanks.
-- CustomPGRetriever: easy to subclass and implement custom retrieval logic
-
-Define retrievers like this: 
-```
-sub_retrievers = [
-    VectorContextRetriever(index.property_graph_store, ...),
-    LLMSynonymRetriever(index.property_graph_store, ...),
-]
-
-retriever = PGRetriever(sub_retrievers=sub_retrievers)
-```
-
-Source: https://docs.llamaindex.ai/en/stable/module_guides/indexing/lpg_index_guide/
-
-### Implementation break down used for investigation
-
-#### graph building from unstructured text
-
-1. docs = [Document(text=sample['text']) for sample in docs]
-2. PropertyGraphIndex.from_documents
-
-##### "from_documents" inner workings: 
-1. Convert your docs to chunks (=Nodes) (See documentation on Documents and Nodes here https://docs.llamaindex.ai/en/stable/module_guides/loading/documents_and_nodes/#documents-nodes) using "transformations" (passed as argument or DEFAULTs TO Settings.transformations.
-2. create the instance form the nodes (means you could have parse your documents yourself and create the instance yourself with the constructor)
-
-##### Constructor call
-arguments:
-- kg_extractors:A list of transformations to apply to the nodes to extract triplets. Defaults to [SimpleLLMPathExtractor(llm=llm), ImplicitEdgeExtractor()]
-- default is to embed_kg_nodes (True)
-- show_progress for progress bar
-
-build_index_from_nodes 
-  - add nodes to docstore
-  - _build_index_from_nodes: an abstract class implemented in propertygraphindex
-  - returns index_struct
-
-##### _build_index_from_nodes implementation in propertygraphindex
-
-when talking about "llama nodes" they talk about the TextNodes representing chunks
-
-
-self._insert_nodes(nodes or [])
-  - applies kg extractors on nodes
-  - builds two lists : one with all nodes and one with all relationships
-  - filters pure node duplciates between our list of all nodes and the list of nodes already in the store (filter applied on "node.id")
-  - filter out duplicate llama nodes 
-  - if _embed_kg_nodes:
-    - embed nodes
-    - embed llama nodes
-  - insert lalma nodes in property graph
-  - insert nodes in property graph
-  - insert relationships in property graphs
-
-
-llama nodes are ChunkNode(s) from Llama-index
-
-#### querying
-
-1. create query engine from the index
-  - possible response modes: https://docs.llamaindex.ai/en/stable/module_guides/deploying/query_engine/response_modes/
-  - if you want to tune it, construct it yourself instead of using the as_query_engine method as it lacks parameters
-2. just call the query engine with the query
-  1. creates a query bundle from the query (see below)
-  2. calls the _query implementation of the query engine you chose
-
-Implementation of _query for the default RetrieverQueryEngine:
-```
-nodes = self.retrieve(query_bundle)
-response = self._response_synthesizer.synthesize(
-    query=query_bundle,
-    nodes=nodes,
+Example with propertygraphindex:
+```python
+index = PropertyGraphIndex.from_documents(
+    nodes,
+    kg_extractors=[extractor1, extractor2, ...],
 )
 ```
 
-The retriever just applies the retrievers that have been registered, and somehow (could not find where it is called but found the method) it also retrieves the source nodes (chunk nodes) for each triplet found. As a result you get the triplets found AND the source texts in your retrieved nodes. I do see it in my code, too.
-  
+Example with knowledgegraphindex:
+```python
+from llama_index.core import KnowledgeGraphIndex
+
+index = KnowledgeGraphIndex.from_documents(
+    nodes,
+    max_triplets_per_chunk=2
+)
+```
+
+```.from_documents``` inner workings: 
+1. Convert your docs to chunks (=Nodes) using "transformations" (passed as argument or defaults to Settings.transformations)
+2. create the instance form the nodes (means you could have parse your documents yourself and create the instance yourself with the constructor)
+- default is to embed_kg_nodes (True)
+- show_progress for progress bar
+- inside constructor, main method called is:
+  - self._insert_nodes(nodes or [])
+    - applies kg extractors on nodes
+    - builds two lists : one with all nodes and one with all relationships
+    - filters pure node duplciates between our list of all nodes and the list of nodes already in the store (filter applied on "node.id")
+    - filter out duplicate llama nodes 
+    - if _embed_kg_nodes:
+      - embed nodes
+      - embed llama nodes
+    - insert lalma nodes in property graph
+    - insert nodes in property graph
+    - insert relationships in property graphs
+
+Save and load from disk:
+```
+# save
+index.storage_context.persist("./storage")
+
+# load
+storage_context = StorageContext.from_defaults(persist_dir="./storage")
+index = load_index_from_storage(storage_context)
+```
+
+kg_extractors:
+- SimpleLLMPathExtractor: extracts single-hop paths of the form (entity1, relation, entity2). Prompt can be customized.
+  - warning: Tune the max_paths_per_chunk argument
+- ImplicitPathExtractor: not very useful in real case, it is when you already have the relationships in the data (so it reads the relationships rather than extracting them). No DL model is used.
+- DynamicLLMPathExtractor: you can give a schema of node and relationship types that the llm will try to follow. In case no type fits its needs, it will add its own types.
+- SchemaLLMPathExtractor: Follows a strict schema without possibility of creating new types.
+
+Stores:
+- Default store: SimplePropertyGraphStore
+  - EntityNode, Relation are nodes and relationships extracted from chunk
+  - EntityNode are linked to their source chunk modeled as TextNode using Relation with label HAS_SOURCE
+- Supporting embeddings: Neo4jPropertyGraphStore, TiDBPropertyGraphStore, FalkorDBPropertyGraphStore
+
+- Ref: https://docs.llamaindex.ai/en/stable/understanding/indexing/indexing/
+- Ref (property graph): https://docs.llamaindex.ai/en/stable/module_guides/indexing/lpg_index_guide/
+
+## 4. Querying the graph
+
+- Build a query engine from the index, passing in the retrievers you want.
+  - possible response modes: https://docs.llamaindex.ai/en/stable/module_guides/deploying/query_engine/response_modes/
+  - if you want to tune it, construct it yourself instead of using the as_query_engine method as it lacks parameters
+- Default retrievers: LLMSynonymRetriever and VectorContextRetriever (if embeddings are enabled).
+  - To enable embeddings you must use a store that supports them. Default in memory store does not support embeddings.
+- Using the query engine:
+  1. it creates a query bundle from the query (see below)
+  2. it calls the _query implementation of the query engine you chose. Basically this method just fetches nodes and pass them to the llm to generate a response.
+
+query bundle:
+```
 Query bundle: 
   Can embed strings and images (give the image_path parameter)
   
@@ -233,8 +201,48 @@ Query bundle:
   custom_embedding_strs (list[str]): list of strings used for embedding the query.
       This is currently used by all embedding-based queries.
   embedding (list[float]): the stored embedding for the query.
+```
 
+base retrievers: 
+- LLMSynonymRetriever: retrieve based on LLM generated keywords/synonyms
+  - a prompt to extract synonyms
+  - fetch matching kg nodes (not llama nodes) and apply get_rel_map on them (gets triples up to a certain depth) => get nodes and neighborhood in form of triplets, then convert triplets to NodeWithScore
+  - I am wondering if by fetching the neighborhood they retrieve the text nodes (input chunks) as the same time, as I can see the text nodes being retrieved also, but I could not find somewhere else from which they could be retrieved. 
+- VectorContextRetriever: retrieve based on embedded graph nodes
+- CustomPGRetriever: easy to subclass and implement custom retrieval logic
 
-#### Implementation tips
+cypher-based retrievers
+- TextToCypherRetriever: ask the LLM to generate cypher based on the schema of the property graph
+  - NOTE: Since the SimplePropertyGraphStore is not actually a graph database, it does not support cypher queries.
+- CypherTemplateRetriever: use a cypher template with params inferred by the LLM
+  - This is a more constrained version of the TextToCypherRetriever. Rather than letting the LLM have free-range of generating any cypher statement, we can instead provide a cypher template and have the LLM fill in the blanks.
 
-- use Settings to define llm and embedding project wide
+Example of passing the retrievers list:
+```python
+# create a retriever
+retriever = index.as_retriever(sub_retrievers=[retriever1, retriever2, ...])
+
+# create a query engine
+query_engine = index.as_query_engine(
+    sub_retrievers=[retriever1, retriever2, ...]
+)
+```
+
+Simple example for creating a query engine from an index:
+```
+query_engine = index.as_query_engine(
+    include_text=True,
+    response_mode="tree_summarize",
+    embedding_mode="hybrid",
+    similarity_top_k=5,
+)
+response = query_engine.query(
+    "Tell me more about what the author worked on at Interleaf",
+)
+```
+
+interesting methods on graph stores:
+- graph_store.get_rel_map([entity_node], depth=2): gets triples up to a certain depth
+- graph_store.get_llama_nodes(['id1']): gets the original text nodes
+- graph_store.structured_query("<cypher query>") - runs a cypher query (assuming the graph store supports it)
+
